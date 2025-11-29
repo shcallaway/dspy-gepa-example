@@ -1,11 +1,7 @@
-"""Model definitions for DSPy GEPA examples."""
+"""Model definitions for all tasks."""
 
-from .classifier import (
-    SentimentClassification,
-    SentimentClassifier,
-    QuestionAnswering,
-    QAModule,
-)
+from .sentiment import SentimentClassification, SentimentClassifier
+from .qa import QuestionAnswering, QAModule
 
 __all__ = [
     "SentimentClassification",

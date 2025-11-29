@@ -1,42 +1,7 @@
-"""
-Evaluation metrics for DSPy GEPA examples.
-"""
+"""Common evaluation utilities shared across tasks."""
 
 from typing import Callable, List
 import dspy
-
-
-def sentiment_accuracy(example, prediction, trace=None) -> bool:
-    """
-    Check if predicted sentiment matches expected sentiment.
-
-    Args:
-        example: DSPy Example with expected sentiment
-        prediction: Model prediction with sentiment field
-        trace: Optional trace (unused)
-
-    Returns:
-        True if sentiments match (case-insensitive), False otherwise
-    """
-    return example.sentiment.lower() == prediction.sentiment.lower()
-
-
-def qa_accuracy(example, prediction, trace=None) -> bool:
-    """
-    Check if predicted answer matches expected answer.
-    Uses case-insensitive exact match.
-
-    Args:
-        example: DSPy Example with expected answer
-        prediction: Model prediction with answer field
-        trace: Optional trace (unused)
-
-    Returns:
-        True if answers match (case-insensitive), False otherwise
-    """
-    expected = str(example.answer).lower().strip()
-    predicted = str(prediction.answer).lower().strip()
-    return expected == predicted
 
 
 def exact_match(example, prediction, trace=None) -> bool:
@@ -106,21 +71,3 @@ def evaluate_model(
 
     accuracy = correct / total if total > 0 else 0.0
     return accuracy
-
-
-# Template for custom metrics:
-#
-# def your_custom_metric(example, prediction, trace=None) -> bool:
-#     """
-#     Custom metric description.
-#
-#     Args:
-#         example: DSPy Example with expected output
-#         prediction: Model prediction
-#         trace: Optional trace
-#
-#     Returns:
-#         True if prediction is correct, False otherwise
-#     """
-#     # Your custom logic here
-#     return example.your_field == prediction.your_field
