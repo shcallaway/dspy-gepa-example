@@ -265,8 +265,8 @@ Each task has its own model file:
 
 ### `metrics/`
 Each task has its own metrics file:
-- `sentiment.py`: `sentiment_accuracy()` metric
-- `qa.py`: `qa_accuracy()` metric
+- `sentiment.py`: `accuracy()` metric
+- `qa.py`: `accuracy()` metric
 - `common.py`: Shared utilities (`exact_match()`, `evaluate_model()`)
 
 ### `main.py`

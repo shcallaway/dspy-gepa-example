@@ -1,7 +1,7 @@
 """Question answering metrics."""
 
 
-def qa_accuracy(example, prediction, trace=None) -> bool:
+def accuracy(example, prediction, trace=None) -> bool:
     """
     Check if predicted answer matches expected answer.
     Uses case-insensitive exact match.

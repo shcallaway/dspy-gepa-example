@@ -1,7 +1,7 @@
 """Sentiment classification metrics."""
 
 
-def sentiment_accuracy(example, prediction, trace=None) -> bool:
+def accuracy(example, prediction, trace=None) -> bool:
     """
     Check if predicted sentiment matches expected sentiment.
 

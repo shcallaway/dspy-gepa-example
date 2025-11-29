@@ -4,7 +4,7 @@ import dspy
 from typing import List, Tuple
 
 
-SENTIMENT_TRAIN_DATA = [
+TRAIN_DATA = [
     ("This movie was absolutely fantastic! I loved every minute.", "positive"),
     ("Terrible experience. Would not recommend to anyone.", "negative"),
     ("Best purchase I've made all year! Highly recommend.", "positive"),
@@ -15,7 +15,7 @@ SENTIMENT_TRAIN_DATA = [
     ("Worst meal I've ever had. Don't go there.", "negative"),
 ]
 
-SENTIMENT_DEV_DATA = [
+DEV_DATA = [
     ("This product is incredible! Worth every penny.", "positive"),
     ("Not good at all. Returned it immediately.", "negative"),
     ("Absolutely love it! Five stars!", "positive"),
@@ -23,15 +23,15 @@ SENTIMENT_DEV_DATA = [
 ]
 
 
-def get_sentiment_data():
+def get_data():
     """Get sentiment classification train and dev datasets."""
     train = []
-    for text, sentiment in SENTIMENT_TRAIN_DATA:
+    for text, sentiment in TRAIN_DATA:
         ex = dspy.Example(text=text, sentiment=sentiment)
         train.append(ex.with_inputs("text"))
 
     dev = []
-    for text, sentiment in SENTIMENT_DEV_DATA:
+    for text, sentiment in DEV_DATA:
         ex = dspy.Example(text=text, sentiment=sentiment)
         dev.append(ex.with_inputs("text"))
 
