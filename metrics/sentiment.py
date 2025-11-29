@@ -1,16 +1,18 @@
 """Sentiment classification metrics."""
 
 
-def accuracy(example, prediction, trace=None) -> bool:
+def accuracy(gold, pred, trace=None, pred_name=None, pred_trace=None) -> bool:
     """
     Check if predicted sentiment matches expected sentiment.
 
     Args:
-        example: DSPy Example with expected sentiment
-        prediction: Model prediction with sentiment field
+        gold: DSPy Example with expected sentiment
+        pred: Model prediction with sentiment field
         trace: Optional trace (unused)
+        pred_name: Name of the prediction (unused)
+        pred_trace: Trace of the prediction (unused)
 
     Returns:
         True if sentiments match (case-insensitive), False otherwise
     """
-    return example.sentiment.lower() == prediction.sentiment.lower()
+    return gold.sentiment.lower() == pred.sentiment.lower()

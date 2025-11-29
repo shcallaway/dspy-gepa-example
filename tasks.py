@@ -12,8 +12,7 @@ TASKS = {
         "get_data": get_sentiment_data,
         "model_class": SentimentClassifier,
         "metric": sentiment_accuracy,
-        "gepa_breadth": 2,
-        "gepa_depth": 1,
+        "gepa_auto": "light",  # Light optimization for simple task
         "input_fields": ["text"],
         "output_field": "sentiment",
     },
@@ -22,8 +21,7 @@ TASKS = {
         "get_data": get_qa_data,
         "model_class": QAModule,
         "metric": qa_accuracy,
-        "gepa_breadth": 3,  # Higher: multi-input optimization
-        "gepa_depth": 2,    # More iterations: complex task
+        "gepa_auto": "medium",  # Medium optimization for multi-input task
         "input_fields": ["question", "context"],
         "output_field": "answer",
     },

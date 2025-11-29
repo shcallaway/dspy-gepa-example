@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import dspy
 from dspy.teleprompt import GEPA
 
 from config import get_default_lm
@@ -46,15 +47,17 @@ def run_gepa_optimization(task_config, train_examples, dev_examples):
     """Run GEPA optimization (generic for all tasks)."""
     print("Step 2: Running GEPA optimization...")
     print("-" * 60)
-    print(f"GEPA Config: breadth={task_config['gepa_breadth']}, depth={task_config['gepa_depth']}")
+    print(f"GEPA Config: auto={task_config['gepa_auto']}")
     print("This will take a few moments as GEPA evolves the prompts...")
     print()
 
+    # Create a reflection LM for GEPA to use for generating new instructions
+    reflection_lm = dspy.LM(model='gpt-4o-mini', temperature=1.0, max_tokens=4000)
+
     optimizer = GEPA(
         metric=task_config["metric"],
-        breadth=task_config["gepa_breadth"],
-        depth=task_config["gepa_depth"],
-        init_temperature=1.0,
+        auto=task_config["gepa_auto"],
+        reflection_lm=reflection_lm,
     )
 
     optimized = optimizer.compile(
