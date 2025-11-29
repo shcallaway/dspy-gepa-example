@@ -127,8 +127,8 @@ Update `__init__.py` files in each directory to export your new functions/classe
 - API keys read from environment variables by default
 
 ### Metric Functions
-- Signature: `metric(example, prediction, trace=None) -> bool`
-- Must compare `example` (ground truth) with `prediction` (model output)
+- Signature: `accuracy(gold, pred, trace=None, pred_name=None, pred_trace=None) -> bool`
+- Must compare `gold` (ground truth) with `pred` (model output)
 - Return `True` for correct, `False` for incorrect
 - See `metrics/common.py` for reusable utilities like `exact_match()`
 

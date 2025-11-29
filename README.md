@@ -40,9 +40,9 @@ dspy-gepa-example/
 │   ├── sentiment.py       # Sentiment metrics
 │   ├── qa.py              # QA metrics
 │   └── common.py          # Shared utilities
+├── tasks.py               # Task registry (glues everything together)
 ├── main.py                # Main tutorial orchestration
-├── requirements.txt       # Project dependencies
-└── README.md              # This file
+└── requirements.txt       # Project dependencies
 ```
 
 ## What This Project Demonstrates
@@ -52,12 +52,12 @@ This project uses GEPA to optimize prompts for **multiple tasks**:
 ### Sentiment Classification
 - Classify text as positive or negative
 - Single-input task demonstrating basic GEPA usage
-- GEPA params: breadth=2, depth=1
+- GEPA optimization level: "light"
 
 ### Question Answering
 - Answer questions based on context
 - Multi-input task (question + context)
-- Demonstrates higher GEPA optimization (breadth=3, depth=2)
+- GEPA optimization level: "medium"
 
 ### Workflow for Each Task
 
@@ -167,7 +167,7 @@ YOUR_TASK_DEV_DATA = [
     # ...
 ]
 
-def get_your_task_data():
+def get_data():
     """Get your task train and dev datasets."""
     train = []
     for input_val, output_val in YOUR_TASK_TRAIN_DATA:
@@ -184,7 +184,7 @@ def get_your_task_data():
 
 Update `datasets/__init__.py`:
 ```python
-from .your_task import get_your_task_data
+from .your_task import get_data as get_your_task_data
 
 __all__ = [..., "get_your_task_data"]
 ```
@@ -229,21 +229,21 @@ Create `metrics/your_task.py`:
 ```python
 """Your task metrics."""
 
-def your_task_accuracy(example, prediction, trace=None) -> bool:
+def accuracy(gold, pred, trace=None, pred_name=None, pred_trace=None) -> bool:
     """Check if prediction is correct."""
-    return example.output.lower() == prediction.output.lower()
+    return gold.output.lower() == pred.output.lower()
 ```
 
 Update `metrics/__init__.py`:
 ```python
-from .your_task import your_task_accuracy
+from .your_task import accuracy as your_task_accuracy
 
 __all__ = [..., "your_task_accuracy"]
 ```
 
-### 4. Register in main.py
+### 4. Register in tasks.py
 
-Add to the `TASKS` dictionary in `main.py`:
+Add to the `TASKS` dictionary in `tasks.py`:
 
 ```python
 TASKS = {
@@ -253,8 +253,7 @@ TASKS = {
         "get_data": get_your_task_data,
         "model_class": YourTaskModule,
         "metric": your_task_accuracy,
-        "gepa_breadth": 3,
-        "gepa_depth": 2,
+        "gepa_auto": "medium",  # or "light", "heavy"
         "input_fields": ["input"],
         "output_field": "output",
     },
@@ -270,16 +269,16 @@ python main.py --task your_task
 ## Key GEPA Parameters
 
 - `metric`: Function to evaluate prompt quality
-- `breadth`: Number of prompt variations per iteration (higher = more exploration)
-- `depth`: Number of optimization iterations (higher = more refinement)
-- `init_temperature`: Creativity in generating variations (0.0-2.0)
+- `auto`: Optimization intensity level ("light", "medium", "heavy")
+- `reflection_lm`: Separate LM for generating instruction variations
+- Higher `auto` levels = more exploration and refinement iterations
 
 ### Task-Specific Parameters
 
-| Task | Breadth | Depth | Rationale |
-|------|---------|-------|-----------|
-| Sentiment | 2 | 1 | Simple task, single input field |
-| QA | 3 | 2 | Complex task, multiple inputs need more optimization |
+| Task | Auto Level | Rationale |
+|------|---------|-----------|
+| Sentiment | "light" | Simple task, single input field |
+| QA | "medium" | Complex task, multiple inputs need more optimization |
 
 ## Module Reference
 
@@ -306,8 +305,11 @@ Each task has its own metrics file:
 - `qa.py`: `accuracy()` metric
 - `common.py`: Shared utilities (`exact_match()`, `evaluate_model()`)
 
-### `main.py`
+### `tasks.py`
 - Task configuration registry (`TASKS` dictionary)
+- Imports and organizes all task components
+
+### `main.py`
 - Generic evaluation functions that work with all tasks
 - Command-line interface for task selection
 - Complete tutorial workflow
