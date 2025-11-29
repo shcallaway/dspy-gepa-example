@@ -2,6 +2,26 @@
 
 A modular, production-ready example of using **GEPA (Generative Evolutionary Prompt Adaptation)** to optimize prompts in DSPy.
 
+## Quick Start
+
+```bash
+# 1. Create and activate virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Set your OpenAI API key
+export OPENAI_API_KEY='your-api-key-here'
+
+# 4. Run the sentiment classification example
+python main.py --task sentiment
+
+# Or run the question answering example
+python main.py --task qa
+```
+
 ## Project Structure
 
 ```
@@ -56,15 +76,22 @@ The per-task file organization makes it easy to:
 
 - Python 3.9 or higher
 - OpenAI API key (or another LLM provider supported by DSPy)
+  - Get one at: https://platform.openai.com/api-keys
 
 ## Setup
 
-1. **Install dependencies:**
+1. **Create a virtual environment (recommended):**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Set your API key:**
+3. **Set your API key (required):**
    ```bash
    export OPENAI_API_KEY='your-api-key-here'
    ```
@@ -74,7 +101,16 @@ The per-task file organization makes it easy to:
    export ANTHROPIC_API_KEY='your-api-key-here'
    ```
 
+   **Note:** The script will not work without an API key set.
+
 ## Usage
+
+**Note:** Make sure you've activated your virtual environment and set your API key before running!
+
+```bash
+source venv/bin/activate  # Activate virtual environment
+export OPENAI_API_KEY='your-api-key-here'  # Set API key
+```
 
 ### Run Sentiment Classification (Default)
 
@@ -228,6 +264,7 @@ TASKS = {
 Then run:
 ```bash
 python main.py --task your_task
+# Or: python3 main.py --task your_task
 ```
 
 ## Key GEPA Parameters
@@ -277,7 +314,7 @@ Each task has its own metrics file:
 
 ## Expected Output
 
-Running `python main.py --task sentiment` will show:
+Running the sentiment task will show:
 
 1. Baseline model performance on dev set
 2. GEPA optimization progress (breadth=2, depth=1)
@@ -285,9 +322,37 @@ Running `python main.py --task sentiment` will show:
 4. Performance comparison and improvement metrics
 5. Demo predictions on new examples
 
-Running `python main.py --task qa` will show the same workflow but with:
+Running the QA task will show the same workflow but with:
 - Multi-field inputs (question + context)
 - More intensive GEPA optimization (breadth=3, depth=2)
+
+## Troubleshooting
+
+### `ModuleNotFoundError: No module named 'dspy'`
+Make sure you've installed dependencies and activated your virtual environment:
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### `command not found: python`
+Use `python3` instead:
+```bash
+python3 main.py --task sentiment
+```
+
+### API Key Errors
+Ensure your API key is set as an environment variable:
+```bash
+# Check if it's set
+echo $OPENAI_API_KEY
+
+# Set it if needed
+export OPENAI_API_KEY='your-api-key-here'
+```
+
+### Script runs but no output
+The GEPA optimization can take a few minutes. Be patient and watch for the progress bars.
 
 ## Learn More
 
