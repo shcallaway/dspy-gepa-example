@@ -54,7 +54,13 @@ def run_gepa_optimization(task_config, train_examples, dev_examples):
     print()
 
     # Create a reflection LM for GEPA to use for generating new instructions
-    reflection_lm = dspy.LM(model='gpt-5-mini', temperature=1.0, max_tokens=4000)
+    reflection_lm = dspy.LM(
+        model='gpt-5-mini',
+        temperature=1.0,
+        max_tokens=16000,  # Reasoning models require >= 16000
+        num_retries=5,  # Retry up to 5 times on rate limit errors
+        timeout=60.0    # 60 second timeout per request
+    )
 
     optimizer = GEPA(
         metric=task_config["metric"],

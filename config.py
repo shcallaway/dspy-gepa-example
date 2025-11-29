@@ -40,13 +40,15 @@ def configure_lm(
 def get_default_lm():
     """
     Get the default language model configuration.
-    Uses OpenAI GPT-5-mini by default.
+    Uses OpenAI GPT-5-mini by default with retry logic for rate limits.
 
     Set OPENAI_API_KEY environment variable before running.
     """
     return configure_lm(
         provider="openai",
-        model="gpt-5-mini"
+        model="gpt-5-mini",
+        num_retries=5,  # Retry up to 5 times on rate limit errors
+        timeout=60.0    # 60 second timeout per request
     )
 
 

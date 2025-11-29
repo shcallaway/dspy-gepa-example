@@ -10,11 +10,6 @@ TRAIN_DATA = [
     ("A box contains 12 chocolates. How many chocolates are in 8 boxes?", "96"),
     ("240 cookies are divided equally among 6 children. How many does each child get?", "40"),
     ("Tom bought 5 books at $12 each and a pen for $3. How much did he spend?", "63"),
-    ("Jane had $200, spent $45, then doubled her remaining money. How much does she have now?", "310"),
-    ("What is 20 plus 30, all divided by 5?", "10"),
-    ("A class has 25 students. Each student needs 4 pencils and 2 erasers. How many items total?", "150"),
-    ("If 100 candies are shared among 8 kids equally, how many does each get?", "12.5"),
-    ("A store had 500 items, sold 120 on Monday and twice that amount on Tuesday. How many remain?", "140"),
 ]
 
 DEV_DATA = [

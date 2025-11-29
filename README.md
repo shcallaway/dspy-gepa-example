@@ -356,6 +356,56 @@ export OPENAI_API_KEY='your-api-key-here'
 ### Script runs but no output
 The GEPA optimization can take a few minutes. Be patient and watch for the progress bars.
 
+### Rate Limit and Quota Errors
+
+If you encounter `RateLimitError` or quota exceeded errors:
+
+**Error: "You exceeded your current quota"**
+This means you've hit your OpenAI billing/usage cap:
+1. Check your usage at https://platform.openai.com/usage
+2. Verify you have credits or add more at https://platform.openai.com/settings/organization/billing
+3. Create a new API key if needed at https://platform.openai.com/api-keys
+
+**Error: "Rate limit exceeded"**
+You're making too many requests per minute. Solutions:
+
+1. **The code already includes retry logic** with exponential backoff (configured in `config.py` and `main.py`)
+
+2. **Reduce LLM call volume** by optimizing task parameters:
+
+   ```python
+   # In models/math.py (or your task file)
+   # Reduce ReAct iterations
+   max_iters=2  # Instead of 5
+
+   # In tasks.py
+   # Use lighter GEPA optimization
+   "gepa_auto": "light",  # Instead of "medium" or "heavy"
+
+   # In datasets/your_task.py
+   # Use fewer training examples
+   TRAIN_DATA = [...]  # Reduce from 10 to 5 examples
+   ```
+
+3. **Increase retry parameters** in `config.py`:
+   ```python
+   configure_lm(
+       model="gpt-5-mini",
+       num_retries=10,  # Increase from 5
+       timeout=120.0    # Increase timeout
+   )
+   ```
+
+4. **Switch to faster/cheaper models**:
+   - Use `gpt-5-nano` instead of `gpt-5-mini` for even faster inference
+   - Or use `gpt-4o-mini` for lower costs
+
+**Understanding LLM Call Volume:**
+- ReAct tasks (like math) make multiple calls per example (up to `max_iters` iterations)
+- GEPA optimization tests multiple prompt variations on your training set
+- Total calls ≈ (GEPA variations) × (training examples) × (max_iters)
+- Example: 3 variations × 5 examples × 2 iters = 30 calls during optimization
+
 ## Learn More
 
 - [DSPy Documentation](https://dspy.ai/)

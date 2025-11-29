@@ -63,7 +63,7 @@ class MathSolver(dspy.Module):
         self.react = dspy.ReAct(
             signature=MathWordProblem,
             tools=[calculate],
-            max_iters=5  # Allow up to 5 reasoning/action iterations
+            max_iters=2  # Reduced to 2 iterations to minimize LLM calls
         )
 
     def forward(self, problem):

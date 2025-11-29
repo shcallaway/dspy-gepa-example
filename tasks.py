@@ -30,7 +30,7 @@ TASKS = {
         "get_data": get_math_data,
         "model_class": MathSolver,
         "metric": math_accuracy,
-        "gepa_auto": "medium",  # Medium optimization for multi-step reasoning with tools
+        "gepa_auto": "light",  # Light optimization to reduce LLM call volume
         "input_fields": ["problem"],
         "output_field": "answer",
     },
