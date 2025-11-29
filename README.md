@@ -7,11 +7,19 @@ A modular, production-ready example of using **GEPA (Generative Evolutionary Pro
 ```
 dspy-gepa-example/
 ├── config.py              # Language model configuration
-├── datasets.py            # Dataset definitions and utilities
-├── metrics.py             # Evaluation metrics
-├── models/
+├── datasets/              # Dataset definitions (per-task organization)
 │   ├── __init__.py
-│   └── classifier.py      # Model signatures and modules
+│   ├── sentiment.py       # Sentiment classification data
+│   └── qa.py              # Question answering data
+├── models/                # Model signatures and modules (per-task)
+│   ├── __init__.py
+│   ├── sentiment.py       # Sentiment models
+│   └── qa.py              # QA models
+├── metrics/               # Evaluation metrics (per-task)
+│   ├── __init__.py
+│   ├── sentiment.py       # Sentiment metrics
+│   ├── qa.py              # QA metrics
+│   └── common.py          # Shared utilities
 ├── main.py                # Main tutorial orchestration
 ├── requirements.txt       # Project dependencies
 └── README.md              # This file
@@ -19,17 +27,29 @@ dspy-gepa-example/
 
 ## What This Project Demonstrates
 
-This project uses GEPA to optimize prompts for various tasks, starting with **sentiment classification**:
+This project uses GEPA to optimize prompts for **multiple tasks**:
 
-1. **Baseline Evaluation** - Test unoptimized Chain of Thought classifier
+### Sentiment Classification
+- Classify text as positive or negative
+- Single-input task demonstrating basic GEPA usage
+- GEPA params: breadth=2, depth=1
+
+### Question Answering
+- Answer questions based on context
+- Multi-input task (question + context)
+- Demonstrates higher GEPA optimization (breadth=3, depth=2)
+
+### Workflow for Each Task
+
+1. **Baseline Evaluation** - Test unoptimized Chain of Thought model
 2. **GEPA Optimization** - Automatically improve prompts through evolution
 3. **Optimized Evaluation** - Measure performance gains
 4. **Comparison** - Quantify improvement
 
-The modular structure makes it easy to:
-- Add new tasks and datasets
-- Experiment with different models
-- Customize evaluation metrics
+The per-task file organization makes it easy to:
+- Understand what code belongs to which task
+- Add new tasks without touching existing ones
+- Experiment with different models and datasets
 - Scale to production use cases
 
 ## Prerequisites
@@ -56,15 +76,26 @@ The modular structure makes it easy to:
 
 ## Usage
 
-### Run the Tutorial
+### Run Sentiment Classification (Default)
 
 ```bash
 python main.py
 ```
 
+Or explicitly:
+```bash
+python main.py --task sentiment
+```
+
+### Run Question Answering
+
+```bash
+python main.py --task qa
+```
+
 ### Customize the LM Provider
 
-Edit `config.py` or pass parameters to `configure_lm()`:
+Edit `config.py` or modify the `get_default_lm()` function:
 
 ```python
 from config import configure_lm
@@ -78,13 +109,17 @@ configure_lm(provider="together", model="meta-llama/Llama-3-70b-chat-hf")
 
 ## Adding New Tasks
 
-The modular structure makes it easy to add new tasks:
+The per-task file organization makes adding new tasks straightforward. Each task needs 3 files:
 
 ### 1. Add Your Dataset
 
-In `datasets.py`:
+Create `datasets/your_task.py`:
 
 ```python
+"""Your task dataset."""
+
+import dspy
+
 YOUR_TASK_TRAIN_DATA = [
     ("input 1", "output 1"),
     ("input 2", "output 2"),
@@ -97,57 +132,102 @@ YOUR_TASK_DEV_DATA = [
 ]
 
 def get_your_task_data():
-    train = create_examples(YOUR_TASK_TRAIN_DATA, input_fields=["input_field"])
-    dev = create_examples(YOUR_TASK_DEV_DATA, input_fields=["input_field"])
+    """Get your task train and dev datasets."""
+    train = []
+    for input_val, output_val in YOUR_TASK_TRAIN_DATA:
+        ex = dspy.Example(input=input_val, output=output_val)
+        train.append(ex.with_inputs("input"))
+
+    dev = []
+    for input_val, output_val in YOUR_TASK_DEV_DATA:
+        ex = dspy.Example(input=input_val, output=output_val)
+        dev.append(ex.with_inputs("input"))
+
     return train, dev
+```
+
+Update `datasets/__init__.py`:
+```python
+from .your_task import get_your_task_data
+
+__all__ = [..., "get_your_task_data"]
 ```
 
 ### 2. Define Your Model
 
-In `models/classifier.py` (or create a new file in `models/`):
+Create `models/your_task.py`:
 
 ```python
+"""Your task models."""
+
+import dspy
+
 class YourTaskSignature(dspy.Signature):
     """Description of your task."""
 
-    input_field: str = dspy.InputField(desc="Input description")
-    output_field: str = dspy.OutputField(desc="Output description")
+    input: str = dspy.InputField(desc="Input description")
+    output: str = dspy.OutputField(desc="Output description")
 
 class YourTaskModule(dspy.Module):
+    """Your task module with Chain of Thought reasoning."""
+
     def __init__(self):
         super().__init__()
         self.predictor = dspy.ChainOfThought(YourTaskSignature)
 
-    def forward(self, input_field):
-        return self.predictor(input_field=input_field)
+    def forward(self, input):
+        return self.predictor(input=input)
+```
+
+Update `models/__init__.py`:
+```python
+from .your_task import YourTaskSignature, YourTaskModule
+
+__all__ = [..., "YourTaskSignature", "YourTaskModule"]
 ```
 
 ### 3. Add Evaluation Metric
 
-In `metrics.py`:
+Create `metrics/your_task.py`:
 
 ```python
-def your_task_metric(example, prediction, trace=None) -> bool:
+"""Your task metrics."""
+
+def your_task_accuracy(example, prediction, trace=None) -> bool:
     """Check if prediction is correct."""
-    return example.output_field == prediction.output_field
+    return example.output.lower() == prediction.output.lower()
 ```
 
-### 4. Create Your Main Script
+Update `metrics/__init__.py`:
+```python
+from .your_task import your_task_accuracy
 
-Copy and modify `main.py`, or add to the existing one:
+__all__ = [..., "your_task_accuracy"]
+```
+
+### 4. Register in main.py
+
+Add to the `TASKS` dictionary in `main.py`:
 
 ```python
-from datasets import get_your_task_data
-from models import YourTaskModule
-from metrics import your_task_metric
+TASKS = {
+    # ... existing tasks ...
+    "your_task": {
+        "name": "Your Task Name",
+        "get_data": get_your_task_data,
+        "model_class": YourTaskModule,
+        "metric": your_task_accuracy,
+        "gepa_breadth": 3,
+        "gepa_depth": 2,
+        "input_fields": ["input"],
+        "output_field": "output",
+    },
+}
+```
 
-train_examples, dev_examples = get_your_task_data()
-optimizer = GEPA(metric=your_task_metric, breadth=3, depth=2)
-optimized = optimizer.compile(
-    student=YourTaskModule(),
-    trainset=train_examples,
-    valset=dev_examples
-)
+Then run:
+```bash
+python main.py --task your_task
 ```
 
 ## Key GEPA Parameters
@@ -157,6 +237,13 @@ optimized = optimizer.compile(
 - `depth`: Number of optimization iterations (higher = more refinement)
 - `init_temperature`: Creativity in generating variations (0.0-2.0)
 
+### Task-Specific Parameters
+
+| Task | Breadth | Depth | Rationale |
+|------|---------|-------|-----------|
+| Sentiment | 2 | 1 | Simple task, single input field |
+| QA | 3 | 2 | Complex task, multiple inputs need more optimization |
+
 ## Module Reference
 
 ### `config.py`
@@ -164,36 +251,43 @@ optimized = optimizer.compile(
 - `get_default_lm()`: Quick setup with OpenAI GPT-4o-mini
 - `PROVIDER_CONFIGS`: Pre-configured settings for common providers
 
-### `datasets.py`
-- `create_examples()`: Convert tuples to DSPy Examples
-- `get_sentiment_data()`: Load sentiment classification data
-- Templates for adding new datasets
+### `datasets/`
+Each task has its own dataset file:
+- `sentiment.py`: Sentiment classification data and loader
+- `qa.py`: Question answering data and loader
+- Add new tasks by creating new files
 
-### `models/classifier.py`
-- `SentimentClassification`: Signature for sentiment task
-- `SentimentClassifier`: Chain of Thought module for sentiment
-- Templates for adding new models
+### `models/`
+Each task has its own model file:
+- `sentiment.py`: `SentimentClassification` signature and `SentimentClassifier` module
+- `qa.py`: `QuestionAnswering` signature and `QAModule`
+- Add new tasks by creating new files
 
-### `metrics.py`
-- `sentiment_accuracy()`: Metric for sentiment classification
-- `exact_match()`: Generic exact match metric
-- `evaluate_model()`: Batch evaluation utility
-- Templates for custom metrics
+### `metrics/`
+Each task has its own metrics file:
+- `sentiment.py`: `sentiment_accuracy()` metric
+- `qa.py`: `qa_accuracy()` metric
+- `common.py`: Shared utilities (`exact_match()`, `evaluate_model()`)
 
 ### `main.py`
+- Task configuration registry (`TASKS` dictionary)
+- Generic evaluation functions that work with all tasks
+- Command-line interface for task selection
 - Complete tutorial workflow
-- Modular functions for each step
-- Easy to customize and extend
 
 ## Expected Output
 
-Running `python main.py` will show:
+Running `python main.py --task sentiment` will show:
 
 1. Baseline model performance on dev set
-2. GEPA optimization progress
+2. GEPA optimization progress (breadth=2, depth=1)
 3. Optimized model performance on dev set
 4. Performance comparison and improvement metrics
 5. Demo predictions on new examples
+
+Running `python main.py --task qa` will show the same workflow but with:
+- Multi-field inputs (question + context)
+- More intensive GEPA optimization (breadth=3, depth=2)
 
 ## Learn More
 
@@ -204,9 +298,8 @@ Running `python main.py` will show:
 ## Contributing
 
 This is a starter template. Feel free to:
-- Add new tasks and datasets
+- Add new tasks and datasets (just create 3 new files!)
 - Experiment with different models (ReAct, ProgramOfThought, etc.)
 - Try different optimizers (BootstrapFewShot, COPRO, MIPROv2)
 - Extend evaluation metrics
 - Share your improvements!
-# dspy-gepa-example
