@@ -1,8 +1,8 @@
 """Task registry and configuration for DSPy GEPA examples."""
 
-from datasets import get_sentiment_data, get_qa_data
-from models import SentimentClassifier, QAModule
-from metrics import sentiment_accuracy, qa_accuracy
+from datasets import get_sentiment_data, get_qa_data, get_math_data
+from models import SentimentClassifier, QAModule, MathSolver
+from metrics import sentiment_accuracy, qa_accuracy, math_accuracy
 
 
 # Task Configuration Registry
@@ -23,6 +23,15 @@ TASKS = {
         "metric": qa_accuracy,
         "gepa_auto": "medium",  # Medium optimization for multi-input task
         "input_fields": ["question", "context"],
+        "output_field": "answer",
+    },
+    "math": {
+        "name": "Math Word Problems (ReAct)",
+        "get_data": get_math_data,
+        "model_class": MathSolver,
+        "metric": math_accuracy,
+        "gepa_auto": "medium",  # Medium optimization for multi-step reasoning with tools
+        "input_fields": ["problem"],
         "output_field": "answer",
     },
 }

@@ -5,10 +5,12 @@ DSPy GEPA Tutorial - Multi-Task Examples
 Demonstrates GEPA optimization on multiple tasks:
 - Sentiment Classification: Classify text as positive/negative
 - Question Answering: Answer questions from context
+- Math Word Problems: Solve math problems using ReAct with calculator tool
 
 Usage:
     python main.py --task sentiment
     python main.py --task qa
+    python main.py --task math
 """
 
 import argparse
@@ -101,6 +103,10 @@ def print_example_result(example, prediction, is_correct, task_config):
         # Sentiment task
         print(f"Text: {example.text[:50]}...")
         print(f"Expected: {example.sentiment} | Predicted: {prediction.sentiment} | {check}")
+    elif task_config["input_fields"] == ["problem"]:
+        # Math task
+        print(f"Problem: {example.problem}")
+        print(f"Expected: {example.answer} | Predicted: {prediction.answer} | {check}")
     else:
         # QA task
         print(f"Q: {example.question}")
@@ -136,6 +142,17 @@ def demo_optimized_model(task_config, model):
             result = model(text=text)
             print(f"Text: {text}")
             print(f"Sentiment: {result.sentiment}")
+            print()
+    elif task_config["input_fields"] == ["problem"]:
+        # Math examples
+        test_problems = [
+            "If 3 pizzas cost $45 total, how much does one pizza cost?",
+            "A train travels 60 miles per hour for 3.5 hours. How far does it go?",
+        ]
+        for problem in test_problems:
+            result = model(problem=problem)
+            print(f"Problem: {problem}")
+            print(f"Answer: {result.answer}")
             print()
     else:
         # QA examples
