@@ -40,20 +40,20 @@ def configure_lm(
 def get_default_lm():
     """
     Get the default language model configuration.
-    Uses OpenAI GPT-4o-mini by default.
+    Uses OpenAI GPT-5-mini by default.
 
     Set OPENAI_API_KEY environment variable before running.
     """
     return configure_lm(
         provider="openai",
-        model="gpt-4o-mini"
+        model="gpt-5-mini"
     )
 
 
 # Example configurations for different providers
 PROVIDER_CONFIGS = {
     "openai": {
-        "model": "gpt-4o-mini",
+        "model": "gpt-5-mini",
         "env_var": "OPENAI_API_KEY"
     },
     "anthropic": {
